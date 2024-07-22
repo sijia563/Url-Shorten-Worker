@@ -475,8 +475,9 @@ function loadKV() {
                 valueLongURL = item.value;
                 // save to localStorage
                 localStorage.setItem(keyPhrase, valueLongURL);
-                createAlert("加载成功", "success", 3000);
+                
             });
+            createAlert("加载成功", "success", 3000);
 
         } else {
             // document.getElementById("result").innerHTML = res.error;
