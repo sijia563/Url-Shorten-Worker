@@ -146,11 +146,11 @@ function addUrlToList(shortUrl, longUrl) {
     child.classList.add("mb-3", "list-group-item");
 
     let row = document.createElement('div');
-    row.classList.add("row", "align-items-center");
+    row.classList.add("row", "align-items-center", "gx-3");
 
     // 短链接信息 Short url
     let shortUrlCol = document.createElement('div');
-    shortUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
+    shortUrlCol.classList.add("col-lg-5", "col-md-6", "mb-2", "mb-lg-0");
     let keyTxt = document.createElement('span');
     keyTxt.classList.add("form-control");
     keyTxt.innerText = window.location.protocol + "//" + window.location.host + "/" + shortUrl;
@@ -159,7 +159,7 @@ function addUrlToList(shortUrl, longUrl) {
 
     // 长链接信息 Long url
     let longUrlCol = document.createElement('div');
-    longUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
+    longUrlCol.classList.add("col-lg-5", "col-md-6", "mb-2", "mb-lg-0");
     let longUrlTxt = document.createElement('span');
     longUrlTxt.classList.add("form-control");
     longUrlTxt.innerText = longUrl;
@@ -239,6 +239,7 @@ function addUrlToList(shortUrl, longUrl) {
 
     urlList.append(child);
 }
+
 
 
 
