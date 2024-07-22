@@ -7,6 +7,20 @@
     <link href="https://preview.tabler.io/dist/css/tabler.min.css?1720208459" rel="stylesheet"/>
     <title>Shorter URL</title>
     <link rel="icon" href="https://vitejs.dev/logo.svg" type="image/x-icon"/>
+    <style>
+        .link-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #shortUrl, #longUrl {
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+        }
+    </style>
 
 </head>
 <body>
@@ -155,10 +169,19 @@
 
                                     </div>
                                 </div>
-
-                                <!--5555-->
-
-
+                                <p>
+                                    1. 本地存储是指浏览器本地存储，不同浏览器不共享数据，清除浏览器缓存会导致数据丢失。
+                                </p>
+                                <p>
+                                    2. KV 是 Cloudflare 键值存储，数据存储在 Cloudflare 上，不会因为清除浏览器缓存而丢失。
+                                </p>
+                                <p>
+                                    3. 本地存储和 KV 存储的数据是相互独立的，互不影响。
+                                </p>
+                                <p>
+                                    4. 本地存储和 KV 存储的数据都是有权限限制的，只有拥有密码的用户才能操作。
+                                </p>
+                                
                             </div>
                         </div>
                     </div>
@@ -221,103 +244,112 @@
 
 <!-- Add this HTML block to your HTML body -->
 <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-body d-flex justify-content-center">
-        <div id="qrcodeContainer"></div>
-      </div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body d-flex flex-column align-items-center">
+                <div id="qrcodeContainer" class="mb-3"></div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-
 <!-- Add this HTML block to your HTML body -->
 <div class="modal fade" id="visitCountModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">链接详情</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>缩短的链接：</strong> <span id="shortUrl"></span>
-          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('shortUrl')">复制</button>
-        </p>
-        <p><strong>原始链接：</strong> <span id="longUrl"></span>
-          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('longUrl')">复制</button>
-        </p>
-        <div id="qrcodeContainerModal" class="d-flex justify-content-center my-3"></div>
-        <p><strong>访问次数：</strong> <span id="visitCount"></span></p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">链接详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>短的链接：</strong> <span id="shortUrlContainer" class="link-container"><span
+                        id="shortUrl"></span> <button class="btn btn-link"
+                                                      onclick="copyToClipboard('shortUrl')">复制</button></span></p>
+                <p><strong>原始链接：</strong> <span id="longUrlContainer" class="link-container"><span
+                        id="longUrl"></span> <button class="btn btn-link"
+                                                     onclick="copyToClipboard('longUrl')">复制</button></span></p>
+                <p><strong>访问次数：</strong> <span id="visitCount"></span></p>
+                <div id="qrcodeContainerModal" class="d-flex justify-content-center my-3"></div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
 
 <!-- Add this HTML block to your HTML body -->
 <div class="modal" id="confirmDeleteModal" tabindex="-1">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      <div class="modal-status bg-danger"></div>
-      <div class="modal-body text-center py-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 9v2m0 4v.01" />
-          <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
-        </svg>
-        <h3>确认删除？</h3>
-        <div class="text-secondary">你确定要删除此项？该操作无法撤销。</div>
-      </div>
-      <div class="modal-footer">
-        <div class="w-100">
-          <div class="row">
-            <div class="col"><button class="btn w-100" data-bs-dismiss="modal">
-                取消
-              </button></div>
-            <div class="col"><button id="confirmDeleteBtn" class="btn btn-danger w-100" data-bs-dismiss="modal">
-                确认删除
-              </button></div>
-          </div>
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-status bg-danger"></div>
+            <div class="modal-body text-center py-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24"
+                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 9v2m0 4v.01"/>
+                    <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"/>
+                </svg>
+                <h3>确认删除？</h3>
+                <div class="text-secondary">你确定要删除此项？该操作无法撤销。</div>
+            </div>
+            <div class="modal-footer">
+                <div class="w-100">
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn w-100" data-bs-dismiss="modal">
+                                取消
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button id="confirmDeleteBtn" class="btn btn-danger w-100" data-bs-dismiss="modal">
+                                确认删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <div class="modal" id="exampleModal" tabindex="-1">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      <div class="modal-status bg-success"></div>
-      <div class="modal-body text-center py-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-green icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <circle cx="12" cy="12" r="9" />
-          <path d="M9 12l2 2l4 -4" />
-        </svg>
-        <h3>短链接生成成功</h3>
-        <div class="text-secondary" id="shortenedUrl"></div>
-      </div>
-      <div class="modal-footer">
-        <div class="w-100">
-          <div class="row">
-            <div class="col">
-              <button class="btn w-100" data-bs-dismiss="modal">
-                关闭
-              </button>
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-status bg-success"></div>
+            <div class="modal-body text-center py-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-green icon-lg" width="24" height="24"
+                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                     stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M9 12l2 2l4 -4"/>
+                </svg>
+                <h3>短链接生成成功</h3>
+                <div class="text-secondary" id="shortenedUrl"></div>
             </div>
-            <div class="col">
-              <button class="btn btn-success w-100" data-bs-dismiss="modal">
-                复制链接
-              </button>
+            <div class="modal-footer">
+                <div class="w-100">
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn w-100" data-bs-dismiss="modal">
+                                关闭
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-success w-100" data-bs-dismiss="modal">
+                                复制链接
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 
@@ -332,8 +364,11 @@
 
 <script src="https://sijia563.github.io/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
 <script src="https://sijia563.github.io/Url-Shorten-Worker/alerts.js" crossorigin="anonymous"></script>
+
 <!-- 如果使用CDN资源就放开这一句, 把上面那一句注释掉
   <script src="https://cdn.jsdelivr.net/gh/crazypeace/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
 -->
+
+
 </body>
 </html>
