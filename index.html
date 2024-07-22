@@ -239,8 +239,12 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p><strong>缩短的链接：</strong> <span id="shortUrl"></span></p>
-        <p><strong>原始链接：</strong> <span id="longUrl"></span></p>
+        <p><strong>缩短的链接：</strong> <span id="shortUrl"></span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('shortUrl')">复制</button>
+        </p>
+        <p><strong>原始链接：</strong> <span id="longUrl"></span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('longUrl')">复制</button>
+        </p>
         <div id="qrcodeContainerModal" class="d-flex justify-content-center my-3"></div>
         <p><strong>访问次数：</strong> <span id="visitCount"></span></p>
       </div>
