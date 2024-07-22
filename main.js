@@ -140,9 +140,10 @@ function loadUrlList() {
         // 如果长链接不为空，加载匹配的localStorage
         // If the long url textbox is not empty, only load matched item in localStorage
         if (longUrl == "" || (longUrl == valueLongURL)) {
-            addUrlToList(keyShortURL, valueLongURL)
+            addUrlToList(keyShortURL, valueLongURL) // 添加到列表
         }
     }
+    createAlert("列表已加载", "success", 3000);
 }
 
 
@@ -265,7 +266,9 @@ function addUrlToList(shortUrl, longUrl) {
 
 
 function clearLocalStorage() {
-    localStorage.clear()
+    localStorage.clear() // 清空localStorage
+    loadUrlList() // 重新加载列表
+    createAlert("已清空", "success", 3000)
 }
 
 let deleteKeyPhrase = ""; // 用于存储当前要删除的键
@@ -475,9 +478,12 @@ function loadKV() {
                 valueLongURL = item.value;
                 // save to localStorage
                 localStorage.setItem(keyPhrase, valueLongURL);
-                
+
             });
             createAlert("加载成功", "success", 3000);
+            // 加载localStorage
+            loadUrlList()
+            
 
         } else {
             // document.getElementById("result").innerHTML = res.error;
