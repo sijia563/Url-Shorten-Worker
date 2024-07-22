@@ -139,6 +139,16 @@ function loadUrlList() {
     }
 }
 
+
+function copyToClipboard(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(function() {
+      alert('链接已复制到剪贴板!');
+    }, function(err) {
+      console.error('无法复制文本: ', err);
+    });
+  }
+
 function addUrlToList(shortUrl, longUrl) {
     let urlList = document.querySelector("#urlList");
 
@@ -146,22 +156,28 @@ function addUrlToList(shortUrl, longUrl) {
     child.classList.add("mb-3", "list-group-item");
 
     let row = document.createElement('div');
-    row.classList.add("row", "align-items-center", "gx-3");
+    row.classList.add("row", "align-items-center");
 
     // 短链接信息 Short url
     let shortUrlCol = document.createElement('div');
-    shortUrlCol.classList.add("col-lg-5", "col-md-6", "mb-2", "mb-lg-0");
+    shortUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
     let keyTxt = document.createElement('span');
     keyTxt.classList.add("form-control");
+    keyTxt.style.whiteSpace = "nowrap";
+    keyTxt.style.overflow = "hidden";
+    keyTxt.style.textOverflow = "ellipsis";
     keyTxt.innerText = window.location.protocol + "//" + window.location.host + "/" + shortUrl;
     shortUrlCol.appendChild(keyTxt);
     row.appendChild(shortUrlCol);
 
     // 长链接信息 Long url
     let longUrlCol = document.createElement('div');
-    longUrlCol.classList.add("col-lg-5", "col-md-6", "mb-2", "mb-lg-0");
+    longUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
     let longUrlTxt = document.createElement('span');
     longUrlTxt.classList.add("form-control");
+    longUrlTxt.style.whiteSpace = "nowrap";
+    longUrlTxt.style.overflow = "hidden";
+    longUrlTxt.style.textOverflow = "ellipsis";
     longUrlTxt.innerText = longUrl;
     longUrlCol.appendChild(longUrlTxt);
     row.appendChild(longUrlCol);
