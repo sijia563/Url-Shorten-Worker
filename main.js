@@ -1,26 +1,29 @@
-let res
+let res;
 
-let apiSrv = window.location.pathname
-let password_value = document.querySelector("#passwordText").value
+let apiSrv = window.location.pathname;
+let password_value = document.querySelector("#passwordText").value;
 // let apiSrv = "https://journal.crazypeace.workers.dev"
 // let password_value = "journaljournal"
 
 // 这是默认行为, 在不同的index.html中可以设置为不同的行为
-// This is default, you can define it to different funciton in different theme index.html
-let buildValueItemFunc = buildValueTxt
+// This is default, you can define it to different function in different theme index.html
+let buildValueItemFunc = buildValueTxt;
 
 function shorturl() {
   if (document.querySelector("#longURL").value == "") {
-    alert("Url cannot be empty!")
-    return
+    alert("Url cannot be empty!");
+    return;
   }
-  
+
   // 短链中不能有空格
   // key can't have space in it
   document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
 
   document.getElementById("addBtn").disabled = true;
   document.getElementById("addBtn").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Please wait...';
+  
+  console.log("Sending request to:", apiSrv);
+  
   fetch(apiSrv, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -39,7 +42,7 @@ function shorturl() {
       // save to localStorage
       localStorage.setItem(keyPhrase, valueLongURL);
       // add to urlList on the page
-      addUrlToList(keyPhrase, valueLongURL)
+      addUrlToList(keyPhrase, valueLongURL);
 
       document.getElementById("result").innerHTML = window.location.protocol + "//" + window.location.host + "/" + res.key;
     } else {
@@ -51,12 +54,56 @@ function shorturl() {
     modal.show();
 
   }).catch(function (err) {
-    alert("Unknow error. Please retry!");
+    alert("Unknown error. Please retry!");
     console.log(err);
     document.getElementById("addBtn").disabled = false;
     document.getElementById("addBtn").innerHTML = 'Shorten it';
-  })
+  });
 }
+
+function loadKV() {
+  // 清空本地存储
+  clearLocalStorage();
+
+  console.log("Sending request to load all KV:", apiSrv);
+  
+  // 从KV中查询, cmd为 "qryall", 查询全部
+  fetch(apiSrv, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cmd: "qryall", password: password_value })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (myJson) {
+    res = myJson;
+    
+    console.log("Received response:", res);
+    
+    // 成功查询 Succeed
+    if (res.status == "200") {
+      // 遍历kvlist
+      res.kvlist.forEach(item => {
+        keyPhrase = item.key;
+        valueLongURL = item.value;
+        // save to localStorage
+        localStorage.setItem(keyPhrase, valueLongURL);
+      });
+
+      // 加载列表
+      loadUrlList();
+    } else {
+      document.getElementById("result").innerHTML = res.error;
+      // 弹出消息窗口 Popup the result
+      var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+      modal.show();
+    }
+  }).catch(function (err) {
+    alert("Unknown error. Please retry!");
+    console.log(err);
+  });
+}
+
+
 
 function copyurl(id, attr) {
   let target = null;
