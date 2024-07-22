@@ -483,7 +483,7 @@ function loadKV() {
             createAlert("加载成功", "success", 3000);
             // 加载localStorage
             loadUrlList()
-            
+
 
         } else {
             // document.getElementById("result").innerHTML = res.error;
