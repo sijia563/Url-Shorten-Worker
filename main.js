@@ -11,8 +11,8 @@ let buildValueItemFunc = buildValueTxt
 
 function shorturl() {
     if (document.querySelector("#longURL").value == "") {
-        alert("Url cannot be empty!")
-        return
+        alert("Url cannot be empty!");
+        return;
     }
 
     // 短链中不能有空格
@@ -44,24 +44,36 @@ function shorturl() {
             // save to localStorage
             localStorage.setItem(keyPhrase, valueLongURL);
             // add to urlList on the page
-            addUrlToList(keyPhrase, valueLongURL)
+            addUrlToList(keyPhrase, valueLongURL);
 
-            document.getElementById("result").innerHTML = window.location.protocol + "//" + window.location.host + "/" + res.key;
+            let shortenedUrl = window.location.protocol + "//" + window.location.host + "/" + res.key;
+            document.getElementById("shortenedUrl").innerText = shortenedUrl;
+
+            var modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show();
         } else {
             document.getElementById("result").innerHTML = res.error;
+            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            modal.show();
         }
 
-        // 弹出消息窗口 Popup the result
-        var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-        modal.show();
-
     }).catch(function (err) {
-        alert("Unknow error. Please retry!");
+        alert("Unknown error. Please retry!");
         console.log(err);
         document.getElementById("addBtn").disabled = false;
         document.getElementById("addBtn").innerHTML = 'Shorten it';
-    })
+    });
 }
+
+document.querySelector('#exampleModal .btn-success').addEventListener('click', function() {
+    let shortenedUrl = document.getElementById("shortenedUrl").innerText;
+    navigator.clipboard.writeText(shortenedUrl).then(function() {
+        alert('Link copied to clipboard!');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+});
+
 
 function copyurl(id, attr) {
     let target = null;
