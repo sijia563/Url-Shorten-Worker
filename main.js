@@ -11,7 +11,7 @@ let buildValueItemFunc = buildValueTxt
 
 function shorturl() {
     if (document.querySelector("#longURL").value == "") {
-        alert("Url cannot be empty!");
+        createAlert("网址不能为空！", "danger", 3000);
         return;
     }
 
@@ -33,6 +33,7 @@ function shorturl() {
     }).then(function (response) {
         return response.json();
     }).then(function (myJson) {
+        let modal;
         res = myJson;
         document.getElementById("addBtn").disabled = false;
         document.getElementById("addBtn").innerHTML = 'Shorten it';
@@ -46,31 +47,35 @@ function shorturl() {
             // add to urlList on the page
             addUrlToList(keyPhrase, valueLongURL);
 
-            let shortenedUrl = window.location.protocol + "//" + window.location.host + "/" + res.key;
-            document.getElementById("shortenedUrl").innerText = shortenedUrl;
+            document.getElementById("shortenedUrl").innerText = window.location.protocol + "//" + window.location.host + "/" + res.key;
 
-            var modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal = new bootstrap.Modal(document.getElementById('exampleModal'));
             modal.show();
+            createAlert("短链已生成", "success", 3000);
+
         } else {
-            document.getElementById("result").innerHTML = res.error;
-            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
+            // document.getElementById("result").innerHTML = res.error;
+            // modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("生成短链失败", "danger", 3000);
         }
 
     }).catch(function (err) {
-        alert("Unknown error. Please retry!");
+        // alert("Unknown error. Please retry!");
+        createAlert("生成短链失败", "danger", 3000);
         console.log(err);
         document.getElementById("addBtn").disabled = false;
         document.getElementById("addBtn").innerHTML = 'Shorten it';
     });
 }
 
-document.querySelector('#exampleModal .btn-success').addEventListener('click', function() {
+document.querySelector('#exampleModal .btn-success').addEventListener('click', function () {
     let shortenedUrl = document.getElementById("shortenedUrl").innerText;
-    navigator.clipboard.writeText(shortenedUrl).then(function() {
+    navigator.clipboard.writeText(shortenedUrl).then(function () {
         alert('链接已复制到剪贴板!');
-    }, function(err) {
-        console.error('Could not copy text: ', err);
+    }, function (err) {
+        // console.error('Could not copy text: ', err);
+        createAlert("复制失败", "danger", 3000);
     });
 });
 
@@ -102,7 +107,8 @@ function copyurl(id, attr) {
         window.getSelection().removeAllRanges();
         // console.log('Copy success')
     } catch (e) {
-        console.log('Copy error')
+        // console.log('Copy error')
+        createAlert("复制失败", "danger", 3000);
     }
 
     if (attr) {
@@ -142,12 +148,13 @@ function loadUrlList() {
 
 function copyToClipboard(elementId) {
     const text = document.getElementById(elementId).innerText;
-    navigator.clipboard.writeText(text).then(function() {
-      alert('链接已复制到剪贴板!');
-    }, function(err) {
-      console.error('无法复制文本: ', err);
+    navigator.clipboard.writeText(text).then(function () {
+        createAlert("链接已复制到剪贴板", "success", 3000);
+    }, function (err) {
+        console.error('无法复制文本: ', err);
+        createAlert("复制失败", "danger", 3000);
     });
-  }
+}
 
 function addUrlToList(shortUrl, longUrl) {
     let urlList = document.querySelector("#urlList");
@@ -257,8 +264,6 @@ function addUrlToList(shortUrl, longUrl) {
 }
 
 
-
-
 function clearLocalStorage() {
     localStorage.clear()
 }
@@ -266,13 +271,13 @@ function clearLocalStorage() {
 let deleteKeyPhrase = ""; // 用于存储当前要删除的键
 
 function showConfirmDeleteModal(keyPhrase) {
-  deleteKeyPhrase = keyPhrase;
-  var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-  modal.show();
+    deleteKeyPhrase = keyPhrase;
+    var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    modal.show();
 }
 
-document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-  deleteShortUrl(deleteKeyPhrase);
+document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    deleteShortUrl(deleteKeyPhrase);
 });
 
 function deleteShortUrl(delKeyPhrase) {
@@ -298,21 +303,25 @@ function deleteShortUrl(delKeyPhrase) {
             // 加载localStorage
             loadUrlList()
 
-            document.getElementById("result").innerHTML = "Delete Successful"
+            // document.getElementById("result").innerHTML = "Delete Successful"
+            createAlert("删除成功", "success", 3000);
         } else {
             document.getElementById("result").innerHTML = res.error;
+            createAlert("删除失败", "danger", 3000);
         }
 
         // 弹出消息窗口 Popup the result
         var modal = new bootstrap.Modal(document.getElementById('resultModal'));
         modal.show();
+        createAlert("删除成功", "success", 3000);
 
     }).catch(function (err) {
-        alert("Unknow error. Please retry!");
+        // alert("Unknow error. Please retry!");
+        createAlert("删除失败", "danger", 3000);
         console.log(err);
+
     })
 }
-
 
 
 // 生成模态框中的二维码
@@ -374,8 +383,10 @@ function queryVisitCount(qryKeyPhrase) {
 
             modal = new bootstrap.Modal(document.getElementById('visitCountModal'));
             modal.show();
+            createAlert("查询成功", "success", 3000);
         } else {
             handleQueryError(qryKeyPhrase);
+            createAlert("查询失败", "danger", 3000);
         }
 
         // 恢复按钮状态
@@ -429,14 +440,15 @@ function query1KV() {
                 cancelable: true,
             }))
         } else {
-            document.getElementById("result").innerHTML = res.error;
-            // 弹出消息窗口 Popup the result
-            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
+            // document.getElementById("result").innerHTML = res.error;
+            // // 弹出消息窗口 Popup the result
+            // var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("查询失败", "danger", 3000);
         }
 
     }).catch(function (err) {
-        alert("Unknow error. Please retry!");
+        createAlert("查询失败", "danger", 3000);
         console.log(err);
     })
 }
@@ -463,16 +475,19 @@ function loadKV() {
                 valueLongURL = item.value;
                 // save to localStorage
                 localStorage.setItem(keyPhrase, valueLongURL);
+                createAlert("加载成功", "success", 3000);
             });
 
         } else {
-            document.getElementById("result").innerHTML = res.error;
-            // 弹出消息窗口 Popup the result
-            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
+            // document.getElementById("result").innerHTML = res.error;
+            // // 弹出消息窗口 Popup the result
+            // var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("查询失败", "danger", 3000);
         }
     }).catch(function (err) {
-        alert("Unknow error. Please retry!");
+        createAlert("查询失败", "danger", 3000);
+        // alert("Unknow error. Please retry!");
         console.log(err);
     })
 }
@@ -538,6 +553,7 @@ function buildQrcode(shortUrl) {
     // 显示模态框
     const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
     modal.show();
+    createAlert("二维码已生成", "success", 3000);
 
     // $("#qrcode-" + shortUrl.replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1").replace(/(:|\#|\[|\]|,|=|@)/g, "\\$1")).empty().qrcode(options);
 }
