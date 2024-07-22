@@ -9,6 +9,8 @@ let password_value = document.querySelector("#passwordText").value;
 // This is default, you can define it to different function in different theme index.html
 let buildValueItemFunc = buildValueTxt;
 
+console.log(5555)
+
 function shorturl() {
   if (document.querySelector("#longURL").value == "") {
     alert("Url cannot be empty!");
