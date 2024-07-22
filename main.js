@@ -68,7 +68,7 @@ function shorturl() {
 document.querySelector('#exampleModal .btn-success').addEventListener('click', function() {
     let shortenedUrl = document.getElementById("shortenedUrl").innerText;
     navigator.clipboard.writeText(shortenedUrl).then(function() {
-        alert('Link copied to clipboard!');
+        alert('链接已复制到剪贴板!');
     }, function(err) {
         console.error('Could not copy text: ', err);
     });
@@ -353,22 +353,34 @@ function queryVisitCount(qryKeyPhrase) {
 
             modal = new bootstrap.Modal(document.getElementById('visitCountModal'));
             modal.show();
-
-            // 恢复按钮状态
-            document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = false;
-            document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>';
-
         } else {
-            document.getElementById("result").innerHTML = res.error;
-            // 弹出错误消息窗口 Popup the result
-            modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
+            handleQueryError(qryKeyPhrase);
         }
+
+        // 恢复按钮状态
+        document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = false;
+        document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>';
     }).catch(function (err) {
-        alert("Unknown error. Please retry!");
-        console.log(err);
+        console.log("Error:", err);
+        handleQueryError(qryKeyPhrase);
     });
 }
+
+function handleQueryError(qryKeyPhrase) {
+    // 查询失败处理，将访问次数设置为0
+    let longUrl = localStorage.getItem(qryKeyPhrase);
+    let shortUrl = window.location.protocol + "//" + window.location.host + "/" + qryKeyPhrase;
+
+    // 显示模态框，并更新模态框中的内容
+    document.getElementById("shortUrl").innerText = shortUrl;
+    document.getElementById("longUrl").innerText = longUrl ? longUrl : "原始链接未找到";
+    document.getElementById("visitCount").innerText = "0";
+    buildQrcodeModal(shortUrl);
+
+    let modal = new bootstrap.Modal(document.getElementById('visitCountModal'));
+    modal.show();
+}
+
 
 function query1KV() {
     let qryKeyPhrase = document.getElementById("keyForQuery").value;
