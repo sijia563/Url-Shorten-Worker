@@ -145,18 +145,30 @@ function addUrlToList(shortUrl, longUrl) {
     let child = document.createElement('div');
     child.classList.add("mb-3", "list-group-item");
 
-    let keyItem = document.createElement('div');
-    keyItem.classList.add("d-flex", "justify-content-between", "align-items-center");
+    let row = document.createElement('div');
+    row.classList.add("row", "align-items-center");
 
     // 短链接信息 Short url
+    let shortUrlCol = document.createElement('div');
+    shortUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
     let keyTxt = document.createElement('span');
-    keyTxt.classList.add("form-control", "me-3");
+    keyTxt.classList.add("form-control");
     keyTxt.innerText = window.location.protocol + "//" + window.location.host + "/" + shortUrl;
-    keyItem.appendChild(keyTxt);
+    shortUrlCol.appendChild(keyTxt);
+    row.appendChild(shortUrlCol);
+
+    // 长链接信息 Long url
+    let longUrlCol = document.createElement('div');
+    longUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
+    let longUrlTxt = document.createElement('span');
+    longUrlTxt.classList.add("form-control");
+    longUrlTxt.innerText = longUrl;
+    longUrlCol.appendChild(longUrlTxt);
+    row.appendChild(longUrlCol);
 
     // 按钮容器 Button container
-    let btnContainer = document.createElement('div');
-    btnContainer.classList.add("d-flex", "align-items-center");
+    let btnCol = document.createElement('div');
+    btnCol.classList.add("col-lg-2", "col-md-12", "d-flex", "justify-content-end", "align-items-center");
 
     // 删除按钮 Remove item button
     let delBtn = document.createElement('button');
@@ -167,16 +179,16 @@ function addUrlToList(shortUrl, longUrl) {
 
     // 添加 SVG 图标
     delBtn.innerHTML = `
-    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M4 7l16 0" />
-        <path d="M10 11l0 6" />
-        <path d="M14 11l0 6" />
-        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+        <path d="M4 7l16 0"></path>
+        <path d="M10 11l0 6"></path>
+        <path d="M14 11l0 6"></path>
+        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
     </svg>
   `;
-    btnContainer.appendChild(delBtn);
+    btnCol.appendChild(delBtn);
 
     // 查询访问次数按钮 Query visit times button
     let qryCntBtn = document.createElement('button');
@@ -187,13 +199,13 @@ function addUrlToList(shortUrl, longUrl) {
 
     // 添加 SVG 图标
     qryCntBtn.innerHTML = `
-    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-        <path d="M12 9h.01" /><path d="M11 12h1v4h1" />
+        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+        <path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path>
     </svg>
   `;
-    btnContainer.appendChild(qryCntBtn);
+    btnCol.appendChild(qryCntBtn);
 
     // 显示二维码按钮 Show QR code button
     let qrcodeBtn = document.createElement('button');
@@ -204,7 +216,7 @@ function addUrlToList(shortUrl, longUrl) {
 
     // 添加 SVG 图标
     qrcodeBtn.innerHTML = `
-    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-qrcode">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-qrcode">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
         <path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
         <path d="M7 17l0 .01" />
@@ -220,22 +232,14 @@ function addUrlToList(shortUrl, longUrl) {
         <path d="M20 17l0 3" />
     </svg>
   `;
-    btnContainer.appendChild(qrcodeBtn);
+    btnCol.appendChild(qrcodeBtn);
 
-    keyItem.appendChild(btnContainer);
-    child.appendChild(keyItem);
-
-    // 插入一个二维码占位 Insert a QR code placeholder
-    let qrcodeItem = document.createElement('div');
-    qrcodeItem.setAttribute('id', 'qrcode-' + shortUrl);
-    qrcodeItem.classList.add("mt-3");
-    child.appendChild(qrcodeItem);
-
-    // 长链接信息 Long url
-    child.appendChild(buildValueItemFunc(longUrl));
+    row.appendChild(btnCol);
+    child.appendChild(row);
 
     urlList.append(child);
 }
+
 
 
 function clearLocalStorage() {
