@@ -1,374 +1,582 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-    <meta http-equiv="content-type" content="txt/html; charset=utf-8"/>
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://preview.tabler.io/dist/css/tabler.min.css?1720208459" rel="stylesheet"/>
-    <title>Shorter URL</title>
-    <link rel="icon" href="https://vitejs.dev/logo.svg" type="image/x-icon"/>
-    <style>
-        .link-container {
-            display: flex;
-            align-items: center;
+let res
+
+let apiSrv = window.location.pathname
+let password_value = document.querySelector("#passwordText").value
+// let apiSrv = "https://journal.crazypeace.workers.dev"
+// let password_value = "journaljournal"
+
+// 这是默认行为, 在不同的index.html中可以设置为不同的行为
+// This is default, you can define it to different funciton in different theme index.html
+let buildValueItemFunc = buildValueTxt
+
+function shorturl() {
+    if (document.querySelector("#longURL").value == "") {
+        createAlert("网址不能为空！", "danger", 3000);
+        return;
+    }
+
+    // 短链中不能有空格
+    // key can't have space in it
+    document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
+
+    document.getElementById("addBtn").disabled = true;
+    document.getElementById("addBtn").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Please wait...';
+    fetch(apiSrv, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            cmd: "add",
+            url: document.querySelector("#longURL").value,
+            key: document.querySelector("#keyPhrase").value,
+            password: password_value
+        })
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        let modal;
+        res = myJson;
+        document.getElementById("addBtn").disabled = false;
+        document.getElementById("addBtn").innerHTML = 'Shorten it';
+
+        // 成功生成短链 Succeed
+        if (res.status == "200") {
+            let keyPhrase = res.key;
+            let valueLongURL = document.querySelector("#longURL").value;
+            // save to localStorage
+            localStorage.setItem(keyPhrase, valueLongURL);
+            // add to urlList on the page
+            addUrlToList(keyPhrase, valueLongURL);
+
+            document.getElementById("shortenedUrl").innerText = window.location.protocol + "//" + window.location.host + "/" + res.key;
+
+            modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show();
+            createAlert("短链已生成", "success", 3000);
+
+        } else {
+            // document.getElementById("result").innerHTML = res.error;
+            // modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("生成短链失败", "danger", 3000);
         }
 
-        #shortUrl, #longUrl {
-            max-width: 80%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: inline-block;
+    }).catch(function (err) {
+        // alert("Unknown error. Please retry!");
+        createAlert("生成短链失败", "danger", 3000);
+        console.log(err);
+        document.getElementById("addBtn").disabled = false;
+        document.getElementById("addBtn").innerHTML = 'Shorten it';
+    });
+}
+
+document.querySelector('#exampleModal .btn-success').addEventListener('click', function () {
+    let shortenedUrl = document.getElementById("shortenedUrl").innerText;
+    navigator.clipboard.writeText(shortenedUrl).then(function () {
+        alert('链接已复制到剪贴板!');
+    }, function (err) {
+        // console.error('Could not copy text: ', err);
+        createAlert("复制失败", "danger", 3000);
+    });
+});
+
+
+function copyurl(id, attr) {
+    let target = null;
+
+    if (attr) {
+        target = document.createElement('div');
+        target.id = 'tempTarget';
+        target.style.opacity = '0';
+        if (id) {
+            let curNode = document.querySelector('#' + id);
+            target.innerText = curNode[attr];
+        } else {
+            target.innerText = attr;
         }
-    </style>
+        document.body.appendChild(target);
+    } else {
+        target = document.querySelector('#' + id);
+    }
 
-</head>
-<body>
+    try {
+        let range = document.createRange();
+        range.selectNode(target);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+        // console.log('Copy success')
+    } catch (e) {
+        // console.log('Copy error')
+        createAlert("复制失败", "danger", 3000);
+    }
 
-<div class="page">
-    <script src="https://preview.tabler.io/dist/js/demo-theme.min.js?1720208459"></script>
-    <!-- Navbar -->
-    <header class="navbar navbar-expand-md d-print-none">
-        <div class="container-xl">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
-                    aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-                <a href="/">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="110" height="32" viewBox="0 0 232 68"
-                         class="navbar-brand-image">
-                        <path d="M64.6 16.2C63 9.9 58.1 5 51.8 3.4 40 1.5 28 1.5 16.2 3.4 9.9 5 5 9.9 3.4 16.2 1.5 28 1.5 40 3.4 51.8 5 58.1 9.9 63 16.2 64.6c11.8 1.9 23.8 1.9 35.6 0C58.1 63 63 58.1 64.6 51.8c1.9-11.8 1.9-23.8 0-35.6zM33.3 36.3c-2.8 4.4-6.6 8.2-11.1 11-1.5.9-3.3.9-4.8.1s-2.4-2.3-2.5-4c0-1.7.9-3.3 2.4-4.1 2.3-1.4 4.4-3.2 6.1-5.3-1.8-2.1-3.8-3.8-6.1-5.3-2.3-1.3-3-4.2-1.7-6.4s4.3-2.9 6.5-1.6c4.5 2.8 8.2 6.5 11.1 10.9 1 1.4 1 3.3.1 4.7zM49.2 46H37.8c-2.1 0-3.8-1-3.8-3s1.7-3 3.8-3h11.4c2.1 0 3.8 1 3.8 3s-1.7 3-3.8 3z"
-                              fill="#066fd1" style="fill: var(--tblr-primary, #066fd1)"></path>
-                        <path d="M105.8 46.1c.4 0 .9.2 1.2.6s.6 1 .6 1.7c0 .9-.5 1.6-1.4 2.2s-2 .9-3.2.9c-2 0-3.7-.4-5-1.3s-2-2.6-2-5.4V31.6h-2.2c-.8 0-1.4-.3-1.9-.8s-.9-1.1-.9-1.9c0-.7.3-1.4.8-1.8s1.2-.7 1.9-.7h2.2v-3.1c0-.8.3-1.5.8-2.1s1.3-.8 2.1-.8 1.5.3 2 .8.8 1.3.8 2.1v3.1h3.4c.8 0 1.4.3 1.9.8s.8 1.2.8 1.9-.3 1.4-.8 1.8-1.2.7-1.9.7h-3.4v13c0 .7.2 1.2.5 1.5s.8.5 1.4.5c.3 0 .6-.1 1.1-.2.5-.2.8-.3 1.2-.3zm28-20.7c.8 0 1.5.3 2.1.8.5.5.8 1.2.8 2.1v20.3c0 .8-.3 1.5-.8 2.1-.5.6-1.2.8-2.1.8s-1.5-.3-2-.8-.8-1.2-.8-2.1c-.8.9-1.9 1.7-3.2 2.4-1.3.7-2.8 1-4.3 1-2.2 0-4.2-.6-6-1.7-1.8-1.1-3.2-2.7-4.2-4.7s-1.6-4.3-1.6-6.9c0-2.6.5-4.9 1.5-6.9s2.4-3.6 4.2-4.8c1.8-1.1 3.7-1.7 5.9-1.7 1.5 0 3 .3 4.3.8 1.3.6 2.5 1.3 3.4 2.1 0-.8.3-1.5.8-2.1.5-.5 1.2-.7 2-.7zm-9.7 21.3c2.1 0 3.8-.8 5.1-2.3s2-3.4 2-5.7-.7-4.2-2-5.8c-1.3-1.5-3-2.3-5.1-2.3-2 0-3.7.8-5 2.3-1.3 1.5-2 3.5-2 5.8s.6 4.2 1.9 5.7 3 2.3 5.1 2.3zm32.1-21.3c2.2 0 4.2.6 6 1.7 1.8 1.1 3.2 2.7 4.2 4.7s1.6 4.3 1.6 6.9-.5 4.9-1.5 6.9-2.4 3.6-4.2 4.8c-1.8 1.1-3.7 1.7-5.9 1.7-1.5 0-3-.3-4.3-.9s-2.5-1.4-3.4-2.3v.3c0 .8-.3 1.5-.8 2.1-.5.6-1.2.8-2.1.8s-1.5-.3-2.1-.8c-.5-.5-.8-1.2-.8-2.1V18.9c0-.8.3-1.5.8-2.1.5-.6 1.2-.8 2.1-.8s1.5.3 2.1.8c.5.6.8 1.3.8 2.1v10c.8-1 1.8-1.8 3.2-2.5 1.3-.7 2.8-1 4.3-1zm-.7 21.3c2 0 3.7-.8 5-2.3s2-3.5 2-5.8-.6-4.2-1.9-5.7-3-2.3-5.1-2.3-3.8.8-5.1 2.3-2 3.4-2 5.7.7 4.2 2 5.8c1.3 1.6 3 2.3 5.1 2.3zm23.6 1.9c0 .8-.3 1.5-.8 2.1s-1.3.8-2.1.8-1.5-.3-2-.8-.8-1.3-.8-2.1V18.9c0-.8.3-1.5.8-2.1s1.3-.8 2.1-.8 1.5.3 2 .8.8 1.3.8 2.1v29.7zm29.3-10.5c0 .8-.3 1.4-.9 1.9-.6.5-1.2.7-2 .7h-15.8c.4 1.9 1.3 3.4 2.6 4.4 1.4 1.1 2.9 1.6 4.7 1.6 1.3 0 2.3-.1 3.1-.4.7-.2 1.3-.5 1.8-.8.4-.3.7-.5.9-.6.6-.3 1.1-.4 1.6-.4.7 0 1.2.2 1.7.7s.7 1 .7 1.7c0 .9-.4 1.6-1.3 2.4-.9.7-2.1 1.4-3.6 1.9s-3 .8-4.6.8c-2.7 0-5-.6-7-1.7s-3.5-2.7-4.6-4.6-1.6-4.2-1.6-6.6c0-2.8.6-5.2 1.7-7.2s2.7-3.7 4.6-4.8 3.9-1.7 6-1.7 4.1.6 6 1.7 3.4 2.7 4.5 4.7c.9 1.9 1.5 4.1 1.5 6.3zm-12.2-7.5c-3.7 0-5.9 1.7-6.6 5.2h12.6v-.3c-.1-1.3-.8-2.5-2-3.5s-2.5-1.4-4-1.4zm30.3-5.2c1 0 1.8.3 2.4.8.7.5 1 1.2 1 1.9 0 1-.3 1.7-.8 2.2-.5.5-1.1.8-1.8.7-.5 0-1-.1-1.6-.3-.2-.1-.4-.1-.6-.2-.4-.1-.7-.1-1.1-.1-.8 0-1.6.3-2.4.8s-1.4 1.3-1.9 2.3-.7 2.3-.7 3.7v11.4c0 .8-.3 1.5-.8 2.1-.5.6-1.2.8-2.1.8s-1.5-.3-2.1-.8c-.5-.6-.8-1.3-.8-2.1V28.8c0-.8.3-1.5.8-2.1.5-.6 1.2-.8 2.1-.8s1.5.3 2.1.8c.5.6.8 1.3.8 2.1v.6c.7-1.3 1.8-2.3 3.2-3 1.3-.7 2.8-1 4.3-1z"
-                              fill-rule="evenodd" clip-rule="evenodd" fill="#4a4a4a"></path>
-                    </svg>
-                </a>
-            </div>
-            <div class="navbar-nav flex-row order-md-last">
-                <div class="d-none d-md-flex me-3">
-                    <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" data-bs-toggle="tooltip"
-                       data-bs-placement="bottom" aria-label="Enable dark mode"
-                       data-bs-original-title="Enable dark mode">
-                        <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                             class="icon">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                            <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
-                        </svg>
-                    </a>
-                    <a href="?theme=light" class="nav-link px-0 hide-theme-light" data-bs-toggle="tooltip"
-                       data-bs-placement="bottom" aria-label="Enable light mode"
-                       data-bs-original-title="Enable light mode">
-                        <!-- Download SVG icon from http://tabler-icons.io/i/sun -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                             class="icon">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                            <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-                            <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path>
-                        </svg>
-                    </a>
-                </div>
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
-                       aria-label="Open user menu">
-                        <span class="avatar avatar-sm"
-                              style="background-image: url(https://gravatar.loli.net/avatar/2790145cc9fdb05725615547bc300afd)"></span>
-                        <div class="d-none d-xl-block ps-2">
-                            <div>斯嘉</div>
-                            <div class="mt-1 small text-secondary">UI 设计师</div>
-                        </div>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <a href="#" class="dropdown-item">Status</a>
-                        <a href="./profile.html" class="dropdown-item">Profile</a>
-                        <a href="#" class="dropdown-item">Feedback</a>
-                        <div class="dropdown-divider"></div>
-                        <a href="./settings.html" class="dropdown-item">Settings</a>
-                        <a href="./sign-in.html" class="dropdown-item">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <div class="page-wrapper">
-        <!-- Page header -->
-        <div class="page-header d-print-none">
-            <div class="container-xl">
-                <div class="row g-2 align-items-center">
-                    <div class="col">
-                        <h2 class="page-title">
-                            使用免费 Cloudflare Worker 和 KV 的 URL 缩短服务
-                        </h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Page body -->
-        <div class="page-body">
-            <div class="container-xl">
-                <div class="row row-cards">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">网址缩短</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="basic-addon1">原始网址</span>
-                                        <input type="text" class="form-control" id="longURL"
-                                               aria-describedby="basic-addon1" placeholder="例如：https://example.com/"
-                                               oninput="loadUrlList()">
-                                    </div>
-                                </div>
+    if (attr) {
+        // remove temp target
+        target.parentElement.removeChild(target);
+    }
+}
 
-                                <div class="mb-3">
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="basic-addon2">自定义短链接</span>
-                                        <input type="text" class="form-control" id="keyPhrase"
-                                               aria-describedby="basic-addon2" placeholder="随意填写">
-                                    </div>
-                                </div>
+function loadUrlList() {
+    // 清空列表
+    let urlList = document.querySelector("#urlList")
+    while (urlList.firstChild) {
+        urlList.removeChild(urlList.firstChild)
+    }
 
-                                <div class="mb-3">
-                                    <div class="input-group">
-                                        <span class="input-group-text" id="basic-addon3">密码</span>
-                                        <input class="form-control" type="text" value="__PASSWORD__" readonly="true"
-                                               id="passwordText" aria-describedby="basic-addon3">
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <button class="btn btn-primary w-100" type="button" onclick="shorturl()"
-                                            id="addBtn">缩短
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    // 文本框中的长链接
+    let longUrl = document.querySelector("#longURL").value
+    // console.log(longUrl)
 
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">本地存储</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="mt-1 mb-3">
-                                    <div class="d-flex justify-content-between">
-                                        <button class="btn btn-success flex-fill mx-1" type="button"
-                                                onclick="loadUrlList()" id="loadListBtn">加载
-                                        </button>
-                                        <button class="btn btn-danger flex-fill mx-1" type="button"
-                                                onclick="clearLocalStorage()" id="clearlocalStgBtn">清除
-                                        </button>
-                                        <button class="btn btn-info flex-fill mx-1" type="button" onclick="loadKV()"
-                                                id="loadKV2localStgBtn">加载KV
-                                        </button>
+    // 遍历localStorage
+    let len = localStorage.length
+    // console.log(+len)
+    for (; len > 0; len--) {
+        let keyShortURL = localStorage.key(len - 1)
+        let valueLongURL = localStorage.getItem(keyShortURL)
 
-                                    </div>
-                                </div>
-                                <p>
-                                    1. 本地存储是指浏览器本地存储，不同浏览器不共享数据，清除浏览器缓存会导致数据丢失。
-                                </p>
-                                <p>
-                                    2. KV 是 Cloudflare 键值存储，数据存储在 Cloudflare 上，不会因为清除浏览器缓存而丢失。
-                                </p>
-                                <p>
-                                    3. 本地存储和 KV 存储的数据是相互独立的，互不影响。
-                                </p>
-                                <p>
-                                    4. 本地存储和 KV 存储的数据都是有权限限制的，只有拥有密码的用户才能操作。
-                                </p>
-                                
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">短链接列表</h3>
-                            </div>
-                            <div class="card-body">
-
-                                <div class="card-text">
-                                    <div class="list-group" id="urlList">
-                                        <div class="mb-3 list-group-item">
-                                            <div class="input-group">
-                                                <button type="button" class="btn btn-danger"
-                                                        onclick='deleteShortUrl("4sure")' id="delBtn-4sure">X
-                                                </button>
-                                                <button type="button" class="btn btn-info"
-                                                        onclick='queryVisitCount("4sure")' id="qryCntBtn-4sure">?
-                                                </button>
-                                                <span class="form-control">https://1way.eu.org/4sure</span>
-                                            </div>
-                                            <div class="form-control">
-                                                https://en.y2mate.is/s36/youtube-to-mp3.html
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+        // 如果长链接为空，加载所有的localStorage
+        // If the long url textbox is empty, load all in localStorage
+        // 如果长链接不为空，加载匹配的localStorage
+        // If the long url textbox is not empty, only load matched item in localStorage
+        if (longUrl == "" || (longUrl == valueLongURL)) {
+            addUrlToList(keyShortURL, valueLongURL) // 添加到列表
+        }
+    }
+    createAlert("列表已加载", "success", 3000);
+}
 
 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+function copyToClipboard(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(function () {
+        createAlert("链接已复制到剪贴板", "success", 3000);
+    }, function (err) {
+        console.error('无法复制文本: ', err);
+        createAlert("复制失败", "danger", 3000);
+    });
+}
 
-    </div>
-</div>
-<div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="resultModalLabel">Result</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="result">No result</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick='copyurl("result")' data-bs-toggle="popover"
-                        data-bs-placement="bottom" data-bs-content="Copied!">Copy
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+function addUrlToList(shortUrl, longUrl) {
+    let urlList = document.querySelector("#urlList");
 
+    let child = document.createElement('div');
+    child.classList.add("mb-3", "list-group-item");
 
-<!-- Add this HTML block to your HTML body -->
-<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-body d-flex flex-column align-items-center">
-                <div id="qrcodeContainer" class="mb-3"></div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Add this HTML block to your HTML body -->
-<div class="modal fade" id="visitCountModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">链接详情</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>短的链接：</strong> <span id="shortUrlContainer" class="link-container"><span
-                        id="shortUrl"></span> <button class="btn btn-link"
-                                                      onclick="copyToClipboard('shortUrl')">复制</button></span></p>
-                <p><strong>原始链接：</strong> <span id="longUrlContainer" class="link-container"><span
-                        id="longUrl"></span> <button class="btn btn-link"
-                                                     onclick="copyToClipboard('longUrl')">复制</button></span></p>
-                <p><strong>访问次数：</strong> <span id="visitCount"></span></p>
-                <div id="qrcodeContainerModal" class="d-flex justify-content-center my-3"></div>
+    let row = document.createElement('div');
+    row.classList.add("row", "align-items-center");
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-            </div>
-        </div>
-    </div>
-</div>
+    // 短链接信息 Short url
+    let shortUrlCol = document.createElement('div');
+    shortUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
+    let keyTxt = document.createElement('span');
+    keyTxt.classList.add("form-control");
+    keyTxt.style.whiteSpace = "nowrap";
+    keyTxt.style.overflow = "hidden";
+    keyTxt.style.textOverflow = "ellipsis";
+    keyTxt.innerText = window.location.protocol + "//" + window.location.host + "/" + shortUrl;
+    shortUrlCol.appendChild(keyTxt);
+    row.appendChild(shortUrlCol);
 
+    // 长链接信息 Long url
+    let longUrlCol = document.createElement('div');
+    longUrlCol.classList.add("col-lg-5", "col-md-12", "mb-2", "mb-lg-0");
+    let longUrlTxt = document.createElement('span');
+    longUrlTxt.classList.add("form-control");
+    longUrlTxt.style.whiteSpace = "nowrap";
+    longUrlTxt.style.overflow = "hidden";
+    longUrlTxt.style.textOverflow = "ellipsis";
+    longUrlTxt.innerText = longUrl;
+    longUrlCol.appendChild(longUrlTxt);
+    row.appendChild(longUrlCol);
 
-<!-- Add this HTML block to your HTML body -->
-<div class="modal" id="confirmDeleteModal" tabindex="-1">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            <div class="modal-status bg-danger"></div>
-            <div class="modal-body text-center py-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24"
-                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                     stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M12 9v2m0 4v.01"/>
-                    <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"/>
-                </svg>
-                <h3>确认删除？</h3>
-                <div class="text-secondary">你确定要删除此项？该操作无法撤销。</div>
-            </div>
-            <div class="modal-footer">
-                <div class="w-100">
-                    <div class="row">
-                        <div class="col">
-                            <button class="btn w-100" data-bs-dismiss="modal">
-                                取消
-                            </button>
-                        </div>
-                        <div class="col">
-                            <button id="confirmDeleteBtn" class="btn btn-danger w-100" data-bs-dismiss="modal">
-                                确认删除
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    // 按钮容器 Button container
+    let btnCol = document.createElement('div');
+    btnCol.classList.add("col-lg-2", "col-md-12", "d-flex", "justify-content-end", "align-items-center");
 
-<div class="modal" id="exampleModal" tabindex="-1">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            <div class="modal-status bg-success"></div>
-            <div class="modal-body text-center py-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-green icon-lg" width="24" height="24"
-                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                     stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M9 12l2 2l4 -4"/>
-                </svg>
-                <h3>短链接生成成功</h3>
-                <div class="text-secondary" id="shortenedUrl"></div>
-            </div>
-            <div class="modal-footer">
-                <div class="w-100">
-                    <div class="row">
-                        <div class="col">
-                            <button class="btn w-100" data-bs-dismiss="modal">
-                                关闭
-                            </button>
-                        </div>
-                        <div class="col">
-                            <button class="btn btn-success w-100" data-bs-dismiss="modal">
-                                复制链接
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    // 删除按钮 Remove item button
+    let delBtn = document.createElement('button');
+    delBtn.setAttribute('type', 'button');
+    delBtn.classList.add("btn", "btn-danger", "btn-icon", "me-2");
+    delBtn.setAttribute('onclick', 'showConfirmDeleteModal(\"' + shortUrl + '\")');
+    delBtn.setAttribute('id', 'delBtn-' + shortUrl);
+
+    // 添加 SVG 图标
+    delBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 7l16 0"></path>
+        <path d="M10 11l0 6"></path>
+        <path d="M14 11l0 6"></path>
+        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
+        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
+    </svg>
+  `;
+    btnCol.appendChild(delBtn);
+
+    // 查询访问次数按钮 Query visit times button
+    let qryCntBtn = document.createElement('button');
+    qryCntBtn.setAttribute('type', 'button');
+    qryCntBtn.classList.add("btn", "btn-info", "btn-icon", "me-2");
+    qryCntBtn.setAttribute('onclick', 'queryVisitCount(\"' + shortUrl + '\")');
+    qryCntBtn.setAttribute('id', 'qryCntBtn-' + shortUrl);
+
+    // 添加 SVG 图标
+    qryCntBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+        <path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path>
+    </svg>
+  `;
+    btnCol.appendChild(qryCntBtn);
+
+    // 显示二维码按钮 Show QR code button
+    let qrcodeBtn = document.createElement('button');
+    qrcodeBtn.setAttribute('type', 'button');
+    qrcodeBtn.classList.add("btn", "btn-primary", "btn-icon");
+    qrcodeBtn.setAttribute('onclick', 'buildQrcode(\"' + shortUrl + '\")');
+    qrcodeBtn.setAttribute('id', 'qrcodeBtn-' + shortUrl);
+
+    // 添加 SVG 图标
+    qrcodeBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-qrcode">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M7 17l0 .01" />
+        <path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M7 7l0 .01" />
+        <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+        <path d="M17 7l0 .01" />
+        <path d="M14 14l3 0" />
+        <path d="M20 14l0 .01" />
+        <path d="M14 14l0 3" />
+        <path d="M14 20l3 0" />
+        <path d="M17 17l3 0" />
+        <path d="M20 17l0 3" />
+    </svg>
+  `;
+    btnCol.appendChild(qrcodeBtn);
+
+    row.appendChild(btnCol);
+    child.appendChild(row);
+
+    urlList.append(child);
+}
 
 
-<script src="https://preview.tabler.io/dist/js/tabler.min.js?1720208459" defer></script>
-<script src="https://preview.tabler.io/dist/js/demo.min.js?1720208459" defer></script>
+function clearLocalStorage() {
+    localStorage.clear() // 清空localStorage
+    loadUrlList() // 重新加载列表
+    createAlert("已清空", "success", 3000)
+}
+
+let deleteKeyPhrase = ""; // 用于存储当前要删除的键
+
+function showConfirmDeleteModal(keyPhrase) {
+    deleteKeyPhrase = keyPhrase;
+    var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    modal.show();
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    deleteShortUrl(deleteKeyPhrase);
+});
+
+function deleteShortUrl(delKeyPhrase) {
+    // 按钮状态 Button Status
+    document.getElementById("delBtn-" + delKeyPhrase).disabled = true;
+    document.getElementById("delBtn-" + delKeyPhrase).innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+    // 从KV中删除 Remove item from KV
+    fetch(apiSrv, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cmd: "del", key: delKeyPhrase, password: password_value})
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        res = myJson;
+
+        // 成功删除 Succeed
+        if (res.status == "200") {
+            // 从localStorage中删除
+            localStorage.removeItem(delKeyPhrase)
+
+            // 加载localStorage
+            loadUrlList()
+
+            // document.getElementById("result").innerHTML = "Delete Successful"
+            createAlert("删除成功", "success", 3000);
+        } else {
+            document.getElementById("result").innerHTML = res.error;
+            createAlert("删除失败", "danger", 3000);
+        }
+
+        // 弹出消息窗口 Popup the result
+        var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+        modal.show();
+        createAlert("删除成功", "success", 3000);
+
+    }).catch(function (err) {
+        // alert("Unknow error. Please retry!");
+        createAlert("删除失败", "danger", 3000);
+        console.log(err);
+
+    })
+}
 
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/gh/lrsjng/jquery-qrcode@0.18.0/dist/jquery-qrcode.min.js"
-        crossorigin="anonymous"></script>
+// 生成模态框中的二维码
+function buildQrcodeModal(shortUrl) {
+    var options = {
+        render: 'canvas',
+        minVersion: 1,
+        maxVersion: 40,
+        ecLevel: 'Q',
+        left: 0,
+        top: 0,
+        size: 256,
+        fill: '#000',
+        background: null,
+        text: shortUrl,
+        radius: 0,
+        quiet: 0,
+        mode: 0,
+        mSize: 0.1,
+        mPosX: 0.5,
+        mPosY: 0.5,
+        label: 'no label',
+        fontname: 'sans',
+        fontcolor: '#000',
+        image: null
+    };
+
+    // 清空并生成新的二维码
+    $("#qrcodeContainerModal").empty().qrcode(options);
+}
+
+function queryVisitCount(qryKeyPhrase) {
+    // 按钮状态 Button Status
+    document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = true;
+    document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+    // 从KV中查询 Query from KV
+    fetch(apiSrv, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cmd: "qry", key: qryKeyPhrase + "-count", password: password_value})
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        let modal;
+        res = myJson;
+
+        // 成功查询 Succeed
+        if (res.status == "200") {
+            // 查询成功后，从localStorage获取原始链接
+            let longUrl = localStorage.getItem(qryKeyPhrase);
+            let shortUrl = window.location.protocol + "//" + window.location.host + "/" + qryKeyPhrase;
+
+            // 显示模态框，并更新模态框中的内容
+            document.getElementById("shortUrl").innerText = shortUrl;
+            document.getElementById("longUrl").innerText = longUrl ? longUrl : "原始链接未找到";
+            document.getElementById("visitCount").innerText = res.url;
+            buildQrcodeModal(shortUrl);
+
+            modal = new bootstrap.Modal(document.getElementById('visitCountModal'));
+            modal.show();
+            createAlert("查询成功", "success", 3000);
+        } else {
+            handleQueryError(qryKeyPhrase);
+            // createAlert("查询失败", "danger", 3000);
+        }
+
+        // 恢复按钮状态
+        document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = false;
+        document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>';
+    }).catch(function (err) {
+        console.log("Error:", err);
+        handleQueryError(qryKeyPhrase);
+    });
+}
+
+function handleQueryError(qryKeyPhrase) {
+    // 查询失败处理，将访问次数设置为0
+    let longUrl = localStorage.getItem(qryKeyPhrase);
+    let shortUrl = window.location.protocol + "//" + window.location.host + "/" + qryKeyPhrase;
+
+    // 显示模态框，并更新模态框中的内容
+    document.getElementById("shortUrl").innerText = shortUrl;
+    document.getElementById("longUrl").innerText = longUrl ? longUrl : "原始链接未找到";
+    document.getElementById("visitCount").innerText = "0";
+    buildQrcodeModal(shortUrl);
+
+    let modal = new bootstrap.Modal(document.getElementById('visitCountModal'));
+    modal.show();
+}
 
 
-<script src="https://sijia563.github.io/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
-<script src="https://sijia563.github.io/Url-Shorten-Worker/alerts.js" crossorigin="anonymous"></script>
+function query1KV() {
+    let qryKeyPhrase = document.getElementById("keyForQuery").value;
+    if (qryKeyPhrase == "") {
+        return
+    }
 
-<!-- 如果使用CDN资源就放开这一句, 把上面那一句注释掉
-  <script src="https://cdn.jsdelivr.net/gh/crazypeace/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
--->
+    // 从KV中查询 Query from KV
+    fetch(apiSrv, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cmd: "qry", key: qryKeyPhrase, password: password_value})
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        res = myJson;
+
+        // 成功查询 Succeed
+        if (res.status == "200") {
+            document.getElementById("longURL").value = res.url;
+            document.getElementById("keyPhrase").value = qryKeyPhrase;
+            // 触发input事件
+            document.getElementById("longURL").dispatchEvent(new Event('input', {
+                bubbles: true,
+                cancelable: true,
+            }))
+        } else {
+            // document.getElementById("result").innerHTML = res.error;
+            // // 弹出消息窗口 Popup the result
+            // var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("查询失败", "danger", 3000);
+        }
+
+    }).catch(function (err) {
+        createAlert("查询失败", "danger", 3000);
+        console.log(err);
+    })
+}
+
+function loadKV() {
+    //清空本地存储
+    clearLocalStorage();
+
+    // 从KV中查询, cmd为 "qryall", 查询全部
+    fetch(apiSrv, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cmd: "qryall", password: password_value})
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        res = myJson;
+        // 成功查询 Succeed
+        if (res.status == "200") {
+
+            // 遍历kvlist
+            res.kvlist.forEach(item => {
+                keyPhrase = item.key;
+                valueLongURL = item.value;
+                // save to localStorage
+                localStorage.setItem(keyPhrase, valueLongURL);
+
+            });
+            createAlert("加载成功", "success", 3000);
+            // 加载localStorage
+            loadUrlList()
 
 
-</body>
-</html>
+        } else {
+            // document.getElementById("result").innerHTML = res.error;
+            // // 弹出消息窗口 Popup the result
+            // var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("查询失败", "danger", 3000);
+        }
+    }).catch(function (err) {
+        createAlert("查询失败", "danger", 3000);
+        // alert("Unknow error. Please retry!");
+        console.log(err);
+    })
+}
+
+// 生成二维码
+function buildQrcode(shortUrl) {
+    // 感谢项目 https://github.com/lrsjng/jquery-qrcode
+    var options = {
+        // render method: 'canvas', 'image' or 'div'
+        render: 'canvas',
+
+        // version range somewhere in 1 .. 40
+        minVersion: 1,
+        maxVersion: 40,
+
+        // error correction level: 'L', 'M', 'Q' or 'H'
+        ecLevel: 'Q',
+
+        // offset in pixel if drawn onto existing canvas
+        left: 0,
+        top: 0,
+
+        // size in pixel
+        size: 256,
+
+        // code color or image element
+        fill: '#000',
+
+        // background color or image element, null for transparent background
+        background: null,
+
+        // content
+        // 要转换的文本
+        text: window.location.protocol + "//" + window.location.host + "/" + shortUrl,
+
+        // corner radius relative to module width: 0.0 .. 0.5
+        radius: 0,
+
+        // quiet zone in modules
+        quiet: 0,
+
+        // modes
+        // 0: normal
+        // 1: label strip
+        // 2: label box
+        // 3: image strip
+        // 4: image box
+        mode: 0,
+
+        mSize: 0.1,
+        mPosX: 0.5,
+        mPosY: 0.5,
+
+        label: 'no label',
+        fontname: 'sans',
+        fontcolor: '#000',
+
+        image: null
+    };
+    // 生成二维码
+    $("#qrcodeContainer").empty().qrcode(options);
+
+    // 显示模态框
+    const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+    modal.show();
+    createAlert("二维码已生成", "success", 3000);
+
+    // $("#qrcode-" + shortUrl.replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1").replace(/(:|\#|\[|\]|,|=|@)/g, "\\$1")).empty().qrcode(options);
+}
+
+function buildValueTxt(longUrl) {
+    let valueTxt = document.createElement('div')
+    valueTxt.classList.add("form-control", "rounded-top-0")
+    valueTxt.innerText = longUrl
+    return valueTxt
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+
+    loadUrlList();
+});
