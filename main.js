@@ -386,7 +386,7 @@ function queryVisitCount(qryKeyPhrase) {
             createAlert("查询成功", "success", 3000);
         } else {
             handleQueryError(qryKeyPhrase);
-            createAlert("查询失败", "danger", 3000);
+            // createAlert("查询失败", "danger", 3000);
         }
 
         // 恢复按钮状态
