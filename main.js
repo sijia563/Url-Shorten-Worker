@@ -262,6 +262,11 @@ function deleteShortUrl(delKeyPhrase) {
         var modal = new bootstrap.Modal(document.getElementById('resultModal'));
         modal.show();
 
+        // 恢复按钮状态 Restore button status
+        document.getElementById("delBtn-" + delKeyPhrase).disabled = false;
+        document.getElementById("delBtn-" + delKeyPhrase).innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M3 5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1V6H3V5zm10-1V6H2V4a1 1 0 0 1 1-1h1.5l1-1h5l1 1H12a1 1 0 0 1 1 1z"/><path fill-rule="evenodd" d="M4 7a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7zm1 0v6h6V7H5  z"/></svg>';
+        
+
     }).catch(function (err) {
         alert("Unknow error. Please retry!");
         console.log(err);
