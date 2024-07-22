@@ -143,8 +143,6 @@ function loadUrlList() {
             addUrlToList(keyShortURL, valueLongURL) // 添加到列表
         }
     }
-    document.getElementById('localStorageCount').innerText = localStorage.length;
-    document.getElementById('lastLoadTime').innerText = new Date().toLocaleString();
     createAlert("列表已加载", "success", 3000);
 }
 
