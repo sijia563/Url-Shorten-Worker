@@ -4,10 +4,10 @@ const config = {
   cors: true, // Allow Cross-origin resource sharing for API requests.
   unique_link: false, // If it is true, the same long url will be shorten into the same short url
   custom_link: true, // Allow users to customize the short url.
-  overwrite_kv: false, // Allow user to overwrite an existed key.
+  overwrite_kv: true, // Allow user to overwrite an existed key.
   snapchat_mode: false, // The link will be distroyed after access.
-  visit_count: false, // Count visit times.
-  load_kv: false, // Load all from Cloudflare KV
+  visit_count: true, // Count visit times.
+  load_kv: true, // Load all from Cloudflare KV
   system_type: "shorturl", // shorturl, imghost, other types {pastebin, journal}
 }
 
@@ -16,8 +16,9 @@ const protect_keylist = [
   "password",
 ]
 
-let index_html = "https://crazypeace.github.io/Url-Shorten-Worker/" + config.theme + "/index.html"
-let result_html = "https://crazypeace.github.io/Url-Shorten-Worker/" + config.theme + "/result.html"
+let index_html = "https://sijia563.github.io/Url-Shorten-Worker/index.html";
+let result_html = "https://sijia563.github.io/Url-Shorten-Worker/result.html";
+
 
 const html404 = `<!DOCTYPE html>
   <html>
