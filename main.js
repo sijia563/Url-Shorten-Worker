@@ -281,22 +281,33 @@ function queryVisitCount(qryKeyPhrase) {
     }).then(function (response) {
         return response.json();
     }).then(function (myJson) {
+        let modal;
         res = myJson;
 
         // 成功查询 Succeed
         if (res.status == "200") {
-            document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = res.url;
+            // 查询成功后，从localStorage获取原始链接
+            let longUrl = localStorage.getItem(qryKeyPhrase);
+            let shortUrl = window.location.protocol + "//" + window.location.host + "/" + qryKeyPhrase;
+
+            // 显示模态框，并更新模态框中的内容
+            document.getElementById("shortUrl").innerText = shortUrl;
+            document.getElementById("longUrl").innerText = longUrl ? longUrl : "原始链接未找到";
+            document.getElementById("visitCount").innerText = res.url;
+            buildQrcodeModal(shortUrl);
+
+            modal = new bootstrap.Modal(document.getElementById('visitCountModal'));
+            modal.show();
         } else {
             document.getElementById("result").innerHTML = res.error;
-            // 弹出消息窗口 Popup the result
-            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // 弹出错误消息窗口 Popup the result
+            modal = new bootstrap.Modal(document.getElementById('resultModal'));
             modal.show();
         }
-
     }).catch(function (err) {
-        alert("Unknow error. Please retry!");
+        alert("Unknown error. Please retry!");
         console.log(err);
-    })
+    });
 }
 
 function query1KV() {
