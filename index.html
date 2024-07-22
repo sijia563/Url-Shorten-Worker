@@ -214,6 +214,28 @@
     </div>
   </div>
 </div>
+
+<!-- Add this HTML block to your HTML body -->
+<div class="modal fade" id="visitCountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">链接详情</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>缩短的链接：</strong> <span id="shortUrl"></span></p>
+        <p><strong>原始链接：</strong> <span id="longUrl"></span></p>
+        <div id="qrcodeContainerModal" class="d-flex justify-content-center my-3"></div>
+        <p><strong>访问次数：</strong> <span id="visitCount"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://preview.tabler.io/dist/js/tabler.min.js?1720208459" defer></script>
 <script src="https://preview.tabler.io/dist/js/demo.min.js?1720208459" defer></script>
 
@@ -223,7 +245,8 @@
         crossorigin="anonymous"></script>
 
 
-<script src="https://sijia563.github.io/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
+<!--<script src="https://sijia563.github.io/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>-->
+<script src="main.js" crossorigin="anonymous"></script>
 <!-- 如果使用CDN资源就放开这一句, 把上面那一句注释掉
   <script src="https://cdn.jsdelivr.net/gh/crazypeace/Url-Shorten-Worker/main.js" crossorigin="anonymous"></script>
 -->
