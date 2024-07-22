@@ -147,24 +147,24 @@ function addUrlToList(shortUrl, longUrl) {
     btnContainer.classList.add("d-flex", "align-items-center");
 
     // 删除按钮 Remove item button
-    let delBtn = document.createElement('button');
-    delBtn.setAttribute('type', 'button');
-    delBtn.classList.add("btn", "btn-danger", "btn-icon", "me-2");
-    delBtn.setAttribute('onclick', 'deleteShortUrl(\"' + shortUrl + '\")');
-    delBtn.setAttribute('id', 'delBtn-' + shortUrl);
+  let delBtn = document.createElement('button');
+  delBtn.setAttribute('type', 'button');
+  delBtn.classList.add("btn", "btn-danger", "rounded-bottom-0");
+  delBtn.setAttribute('onclick', 'showConfirmDeleteModal(\"' + shortUrl + '\")');
+  delBtn.setAttribute('id', 'delBtn-' + shortUrl);
 
-    // 添加 SVG 图标
-    delBtn.innerHTML = `
-    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path d="M4 7l16 0" />
-        <path d="M10 11l0 6" />
-        <path d="M14 11l0 6" />
-        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+  // 添加 SVG 图标
+  delBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-trash">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 7l16 0" />
+      <path d="M10 11l0 6" />
+      <path d="M14 11l0 6" />
+      <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+      <path d="M9 7l1 -3h4l1 3" />
     </svg>
   `;
-    btnContainer.appendChild(delBtn);
+  keyItem.appendChild(delBtn);
 
     // 查询访问次数按钮 Query visit times button
     let qryCntBtn = document.createElement('button');
@@ -230,6 +230,18 @@ function clearLocalStorage() {
     localStorage.clear()
 }
 
+let deleteKeyPhrase = ""; // 用于存储当前要删除的键
+
+function showConfirmDeleteModal(keyPhrase) {
+  deleteKeyPhrase = keyPhrase;
+  var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+  modal.show();
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+  deleteShortUrl(deleteKeyPhrase);
+});
+
 function deleteShortUrl(delKeyPhrase) {
     // 按钮状态 Button Status
     document.getElementById("delBtn-" + delKeyPhrase).disabled = true;
@@ -262,12 +274,12 @@ function deleteShortUrl(delKeyPhrase) {
         var modal = new bootstrap.Modal(document.getElementById('resultModal'));
         modal.show();
 
-
     }).catch(function (err) {
         alert("Unknow error. Please retry!");
         console.log(err);
     })
 }
+
 
 
 // 生成模态框中的二维码
@@ -333,7 +345,7 @@ function queryVisitCount(qryKeyPhrase) {
             // 恢复按钮状态
             document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = false;
             document.getElementById("qryCntBtn-" + qryKeyPhrase).innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>';
-            
+
         } else {
             document.getElementById("result").innerHTML = res.error;
             // 弹出错误消息窗口 Popup the result
