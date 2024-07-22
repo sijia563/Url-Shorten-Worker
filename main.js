@@ -268,6 +268,36 @@ function deleteShortUrl(delKeyPhrase) {
     })
 }
 
+
+// 生成模态框中的二维码
+function buildQrcodeModal(shortUrl) {
+    var options = {
+        render: 'canvas',
+        minVersion: 1,
+        maxVersion: 40,
+        ecLevel: 'Q',
+        left: 0,
+        top: 0,
+        size: 256,
+        fill: '#000',
+        background: null,
+        text: shortUrl,
+        radius: 0,
+        quiet: 0,
+        mode: 0,
+        mSize: 0.1,
+        mPosX: 0.5,
+        mPosY: 0.5,
+        label: 'no label',
+        fontname: 'sans',
+        fontcolor: '#000',
+        image: null
+    };
+
+    // 清空并生成新的二维码
+    $("#qrcodeContainerModal").empty().qrcode(options);
+}
+
 function queryVisitCount(qryKeyPhrase) {
     // 按钮状态 Button Status
     document.getElementById("qryCntBtn-" + qryKeyPhrase).disabled = true;
