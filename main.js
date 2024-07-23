@@ -588,8 +588,6 @@
 
 
 
-
-
 let res
 
 let apiSrv = window.location.pathname
@@ -639,6 +637,11 @@ function shortUrl() {
 
                 new bootstrap.Modal(document.getElementById('exampleModal')).show();
                 createAlert("短链已生成", SUCCESS);
+
+                // 清空输入框
+                $("#longURL").val("");
+                $("#keyPhrase").val("");
+
             } else {
                 createAlert("生成短链失败,请求失败", WARNING);
                 console.error(res.error);
