@@ -605,7 +605,7 @@ function shortUrl() {
     const keyPhraseInput = $('#keyPhrase');
     const addBtn = $("#addBtn");
 
-    if (longURL === "") {
+    if (longURL == "") {
         createAlert("网址不能为空", DANGER);
         return;
     }
