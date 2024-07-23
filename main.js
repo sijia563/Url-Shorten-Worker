@@ -590,10 +590,6 @@
 
 
 
-
-
-
-
 let res
 
 let apiSrv = window.location.pathname
@@ -633,7 +629,7 @@ function shortUrl() {
             let modal;
             res = myJson;
 
-            if (res.status === "200") {
+            if (res.status == "200") {
                 const keyPhrase = res.key;
                 localStorage.setItem(keyPhrase, longURL);
                 addUrlToList(keyPhrase, longURL);
