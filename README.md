@@ -1,4 +1,24 @@
-# 演示
+# 必看说明
+原作者项目地址：https://github.com/crazypeace/Url-Shorten-Worker
+
+我只是进行了页面的美化，修改了一些页面展示，优化了用户体验。所有核心功能和逻辑均来自于原作者的项目。在此特别感谢原作者的辛勤付出！
+
+如果您需要了解更多关于项目的核心功能和技术细节，请移步原作者的项目地址：https://github.com/crazypeace/Url-Shorten-Worker
+
+# 页面展示
+
+
+
+
+
+
+
+
+
+
+
+
+
 短链系统 https://1way.eu.org/bodongshouqulveweifengci
 
 网络记事本 Pastebin https://pastebin.icdyct.cloudns.asia/tieludasiliqiuweiyue
