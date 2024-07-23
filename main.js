@@ -582,26 +582,35 @@
 // });
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 let res
 
 let apiSrv = window.location.pathname
 let password_value = document.querySelector("#passwordText").value
 let buildValueItemFunc = buildValueTxt
-const SHORT_URL_FAILED = "生成短链失败"
-const SHORT_URL_SUCCESS = "短链已生成"
-const SHORT_URL_EMPTY = "网址不能为空"
 const DANGER = "danger"
 const SUCCESS = "success"
 const WARNING = "warning"
 
-
+// 缩短网址
 function shortUrl() {
     const longURL = $("#longURL").val().trim();
     const keyPhraseInput = $('#keyPhrase');
     const addBtn = $("#addBtn");
 
     if (longURL === "") {
-        createAlert(SHORT_URL_EMPTY, DANGER);
+        createAlert("网址不能为空", DANGER);
         return;
     }
 
@@ -630,19 +639,30 @@ function shortUrl() {
                 addUrlToList(keyPhrase, longURL);
 
                 $("#shortenedUrl").text(`${window.location.protocol}//${window.location.host}/${res.key}`);
+                console.log("短链已生成, 短链为:", res.key);
 
                 new bootstrap.Modal(document.getElementById('exampleModal')).show();
                 createAlert("短链已生成", SUCCESS);
             } else {
                 createAlert("生成短链失败,请求失败", WARNING);
+                console.error(res.error);
             }
         }).catch(err => {
-            createAlert("生成短链失败,发生错误", DANGER);
-        }).finally(() => {
-            addBtn.prop("disabled", false).html('缩短');
-        });
+        createAlert("生成短链失败,发生错误", DANGER);
+    }).finally(() => {
+        addBtn.prop("disabled", false).html('缩短');
+    });
 }
 
+// 复制到剪贴板
+function copyToClipboard(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(function () {
+        createAlert("链接已复制", SUCCESS);
+    }, function (err) {
+        createAlert("复制失败", DANGER);
+    });
+}
 
 
 document.querySelector('#exampleModal .btn-success').addEventListener('click', function () {
@@ -655,43 +675,6 @@ document.querySelector('#exampleModal .btn-success').addEventListener('click', f
     });
 });
 
-
-function copyurl(id, attr) {
-    let target = null;
-
-    if (attr) {
-        target = document.createElement('div');
-        target.id = 'tempTarget';
-        target.style.opacity = '0';
-        if (id) {
-            let curNode = document.querySelector('#' + id);
-            target.innerText = curNode[attr];
-        } else {
-            target.innerText = attr;
-        }
-        document.body.appendChild(target);
-    } else {
-        target = document.querySelector('#' + id);
-    }
-
-    try {
-        let range = document.createRange();
-        range.selectNode(target);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
-        document.execCommand('copy');
-        window.getSelection().removeAllRanges();
-        // console.log('Copy success')
-    } catch (e) {
-        // console.log('Copy error')
-        createAlert("复制失败", "danger", 3000);
-    }
-
-    if (attr) {
-        // remove temp target
-        target.parentElement.removeChild(target);
-    }
-}
 
 function loadUrlList() {
     // 清空列表
@@ -722,16 +705,6 @@ function loadUrlList() {
     createAlert("列表已加载", "success", 3000);
 }
 
-
-function copyToClipboard(elementId) {
-    const text = document.getElementById(elementId).innerText;
-    navigator.clipboard.writeText(text).then(function () {
-        createAlert("链接已复制到剪贴板", "success", 3000);
-    }, function (err) {
-        console.error('无法复制文本: ', err);
-        createAlert("复制失败", "danger", 3000);
-    });
-}
 
 function addUrlToList(shortUrl, longUrl) {
     let urlList = document.querySelector("#urlList");
@@ -849,11 +822,12 @@ function clearLocalStorage() {
 
 let deleteKeyPhrase = ""; // 用于存储当前要删除的键
 
+// 显示确认删除模态框
 function showConfirmDeleteModal(keyPhrase) {
     deleteKeyPhrase = keyPhrase;
-    var modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('confirmDeleteModal')).show();
 }
+
 
 document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
     deleteShortUrl(deleteKeyPhrase);
@@ -1147,3 +1121,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
     loadUrlList();
 });
+
+
+//-----------------------------------------
+
+//原作者模态框的复制功能
+function copyurl(id, attr) {
+    let target = null;
+
+    if (attr) {
+        target = document.createElement('div');
+        target.id = 'tempTarget';
+        target.style.opacity = '0';
+        if (id) {
+            let curNode = document.querySelector('#' + id);
+            target.innerText = curNode[attr];
+        } else {
+            target.innerText = attr;
+        }
+        document.body.appendChild(target);
+    } else {
+        target = document.querySelector('#' + id);
+    }
+
+    try {
+        let range = document.createRange();
+        range.selectNode(target);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+        // console.log('Copy success')
+    } catch (e) {
+        // console.log('Copy error')
+        createAlert("复制失败", "danger", 3000);
+    }
+
+    if (attr) {
+        // remove temp target
+        target.parentElement.removeChild(target);
+    }
+}
