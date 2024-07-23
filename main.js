@@ -582,8 +582,6 @@
 // });
 
 
-
-
 let res
 
 let apiSrv = window.location.pathname
@@ -1132,11 +1130,7 @@ function buildQrcode(shortUrl) {
     $("#qrcodeContainer").empty().qrcode(options);
 
     // 显示模态框
-    const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
-    modal.show();
-    createAlert("二维码已生成", "success", 3000);
-
-    // $("#qrcode-" + shortUrl.replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1").replace(/(:|\#|\[|\]|,|=|@)/g, "\\$1")).empty().qrcode(options);
+    new bootstrap.Modal(document.getElementById('qrCodeModal')).show();
 }
 
 function buildValueTxt(longUrl) {
