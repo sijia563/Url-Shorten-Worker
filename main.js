@@ -582,6 +582,11 @@
 // });
 
 
+
+
+
+
+
 let res
 
 let apiSrv = window.location.pathname
@@ -592,54 +597,65 @@ const SHORT_URL_SUCCESS = "短链已生成"
 const SHORT_URL_EMPTY = "网址不能为空"
 
 function shortUrl() {
-    const longURL = $("#longURL").val();
-    const keyPhraseInput = $('#keyPhrase');
-    const addBtn = $("#addBtn");
-
-    if (longURL === "") {
-        createAlert(SHORT_URL_EMPTY, "danger");
+    if (document.querySelector("#longURL").value == "") {
+        createAlert("网址不能为空！", "danger", 3000);
         return;
     }
 
     // 短链中不能有空格
-    keyPhraseInput.val(keyPhraseInput.val().replace(/\s/g, "-"));
+    // key can't have space in it
+    document.getElementById('keyPhrase').value = document.getElementById('keyPhrase').value.replace(/\s/g, "-");
 
-    addBtn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm me-2" role="status"></span> 处理中...');
-
-    $.ajax({
-        url: apiSrv,
+    document.getElementById("addBtn").disabled = true;
+    document.getElementById("addBtn").innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Please wait...';
+    fetch(apiSrv, {
         method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
             cmd: "add",
-            url: longURL,
-            key: keyPhraseInput.val(),
+            url: document.querySelector("#longURL").value,
+            key: document.querySelector("#keyPhrase").value,
             password: password_value
-        }),
-        success: function (myJson) {
-            res = myJson;
+        })
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        let modal;
+        res = myJson;
+        document.getElementById("addBtn").disabled = false;
+        document.getElementById("addBtn").innerHTML = 'Shorten it';
 
-            if (res.status === "200") {
-                const keyPhrase = res.key;
-                localStorage.setItem(keyPhrase, longURL);
-                addUrlToList(keyPhrase, longURL);
+        // 成功生成短链 Succeed
+        if (res.status == "200") {
+            let keyPhrase = res.key;
+            let valueLongURL = document.querySelector("#longURL").value;
+            // save to localStorage
+            localStorage.setItem(keyPhrase, valueLongURL);
+            // add to urlList on the page
+            addUrlToList(keyPhrase, valueLongURL);
 
-                $("#shortenedUrl").text(`${window.location.protocol}//${window.location.host}/${res.key}`);
+            document.getElementById("shortenedUrl").innerText = window.location.protocol + "//" + window.location.host + "/" + res.key;
 
-                new bootstrap.Modal(document.getElementById('exampleModal')).show();
-                createAlert("SHORT_URL_SUCCESS", "success");
-            } else {
-                createAlert(SHORT_URL_FAILED, "danger");
-            }
-        },
-        error: function () {
-            createAlert(SHORT_URL_FAILED, "danger");
-        },
-        complete: function () {
-            addBtn.prop("disabled", false).html('缩短');
+            modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show();
+            createAlert("短链已生成", "success", 3000);
+
+        } else {
+            // document.getElementById("result").innerHTML = res.error;
+            // modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            // modal.show();
+            createAlert("生成短链失败", "danger", 3000);
         }
+
+    }).catch(function (err) {
+        // alert("Unknown error. Please retry!");
+        createAlert("生成短链失败", "danger", 3000);
+        console.log(err);
+        document.getElementById("addBtn").disabled = false;
+        document.getElementById("addBtn").innerHTML = 'Shorten it';
     });
 }
+
 
 
 document.querySelector('#exampleModal .btn-success').addEventListener('click', function () {
