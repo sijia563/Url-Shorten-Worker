@@ -635,7 +635,6 @@ function shortUrl() {
                 createAlert("短链已生成", SUCCESS);
             } else {
                 createAlert("生成短链失败,请求失败", WARNING);
-                console.error(res.error);
             }
         }).catch(err => {
             createAlert("生成短链失败,发生错误", DANGER);
